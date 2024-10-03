@@ -324,9 +324,9 @@ async def on_ready():
     await client.tree.sync()
     client.loop.create_task(live_status_task())  # เริ่มการตรวจสอบสถานะ Twitch
     # check new clip
-    discord_channel = client.get_channel(discord_channel_id)
-    await check_youtube(channel_id, discord_channel)  # เรียกฟังก์ชันทันทีเพื่อส่งคลิปล่าสุด
-    client.loop.create_task(youtube_notifier(client, channel_id, discord_channel_id)) # ตรวจสอบการอัพคลิปลง youtube
+    # discord_channel = client.get_channel(discord_channel_id)
+    # await check_youtube(channel_id, discord_channel)  # เรียกฟังก์ชันทันทีเพื่อส่งคลิปล่าสุด
+    # client.loop.create_task(youtube_notifier(client, channel_id, discord_channel_id)) # ตรวจสอบการอัพคลิปลง youtube
     client.loop.create_task(youtube_live_status_task())  # เริ่มการตรวจสอบสถานะ YouTube
 
 
