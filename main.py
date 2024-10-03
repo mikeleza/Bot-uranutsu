@@ -53,7 +53,7 @@ def write_last_video_id(video_id):
 # Cache for the last video
 last_video_id = read_last_video_id()  
 channel_id = os.getenv('channel_id')
-discord_channel_id = 1290866770328162329
+discord_channel_id = 1267797519480393829
 
 async def check_youtube(channel_id, discord_channel):
     global last_video_id
