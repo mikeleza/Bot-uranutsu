@@ -3,6 +3,7 @@ import discord
 import requests
 import asyncio
 import feedparser
+import time
 from discord import app_commands
 from discord.ext import commands
 from server import server_on
@@ -193,7 +194,7 @@ async def live_status_task():
     token = get_twitch_token()
     user_id, icon_url = get_user_id(TWITCH_USERNAME, token)
 
-    is_live = False  # สถานะเริ่มต้น: ไม่ไลฟ์
+    global is_live 
 
     while not client.is_closed():
         stream = check_live_status(user_id, token)
@@ -204,8 +205,8 @@ async def live_status_task():
             viewer_count = stream['viewer_count']  # จำนวนคนดู
             thumbnail_url = stream['thumbnail_url']  # URL ของตัมแมล
 
-            # เปลี่ยน URL ของ thumbnail ให้ถูกต้อง
-            thumbnail_url = thumbnail_url.replace("{width}x{height}", "1280x720")  # เปลี่ยนขนาดของตัมแมล
+            timestamp = int(time.time())
+            thumbnail_url = f"{thumbnail_url.replace('{width}x{height}', '1280x720')}?t={timestamp}"
 
             embed = discord.Embed(
                 description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
