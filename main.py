@@ -136,6 +136,106 @@ async def on_message(message):
 
 ###################################################################################################################################
 
+# # Get Twitch OAuth Token
+# def get_twitch_token():
+#     params = {
+#         'client_id': CLIENT_ID,
+#         'client_secret': CLIENT_SECRET,
+#         'grant_type': 'client_credentials'
+#     }
+#     response = requests.post(OAUTH_URL, params=params)
+#     return response.json().get('access_token')
+
+# # Get Twitch user ID by username
+# def get_user_id(twitch_username, token):
+#     headers = {
+#         'Client-ID': CLIENT_ID,
+#         'Authorization': f'Bearer {token}'
+#     }
+#     params = {'login': twitch_username}
+#     response = requests.get(USER_INFO_URL, headers=headers, params=params)
+#     data = response.json().get('data')
+#     if data:
+#         return data[0]['id'], data[0]['profile_image_url']  # คืนค่า ID และ URL ของไอคอน
+#     return None, None  # คืนค่า None ถ้าไม่พบข้อมูล
+
+##################################################################################################################################
+# Function to get the latest clip from YouTube
+async def get_latest_clip(channel_id, discord_channel):
+    feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+    feed = feedparser.parse(feed_url)
+
+    if feed.entries:
+        latest_video = feed.entries[0]
+        video_title = latest_video['title']
+        video_url = latest_video['link']
+        thumbnail_url = latest_video.get('media_thumbnail', [{'url': ''}])[0]['url']  # ดึง thumbnail
+
+        # ส่งการแจ้งเตือนใน Discord
+        await discord_channel.send(f'Uranutsu Ch. อัพคลิปแล้ว มาดูกันเร๊วววววววว @everyone\n{video_url}')
+
+# Check if the user is live
+# def check_live_status(user_id, token):
+#     headers = {
+#         'Client-ID': CLIENT_ID,
+#         'Authorization': f'Bearer {token}'
+#     }
+#     params = {'user_id': user_id}
+#     response = requests.get(STREAMS_URL, headers=headers, params=params)
+#     streams = response.json().get('data')
+#     if streams:
+#         return streams[0]  # คืนค่าข้อมูลสตรีมถ้ามี
+#     return None  # คืนค่า None ถ้าไม่มีสตรีม
+
+# # Task to check Twitch live status periodically
+# async def live_status_task():
+#     await client.wait_until_ready()
+#     channel = client.get_channel(1267797428849868811)  # ใส่ ID ของช่อง Discord ที่ต้องการให้บอทแจ้งเตือน
+#     token = get_twitch_token()
+#     user_id, icon_url = get_user_id(TWITCH_USERNAME, token)
+
+#     global is_live 
+
+#     while not client.is_closed():
+#         stream = check_live_status(user_id, token)
+#         if stream and not is_live:
+#             # ถ้าผู้ใช้ไลฟ์อยู่และก่อนหน้านี้ไม่ไลฟ์
+#             title = stream['title']  # ชื่อไลฟ์
+#             game_name = stream['game_name']  # ชื่อเกม
+#             viewer_count = stream['viewer_count']  # จำนวนคนดู
+#             thumbnail_url = stream['thumbnail_url']  # URL ของตัมแมล
+
+#             timestamp = int(time.time())
+#             thumbnail_url = f"{thumbnail_url.replace('{width}x{height}', '1280x720')}?t={timestamp}"
+
+#             embed = discord.Embed(
+#                 description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
+#                 color=0x9146FF  # สีม่วง
+#             )
+
+#             # เพิ่มชื่อช่องและรูปโปรไฟล์ทางซ้าย
+#             embed.set_author(
+#                 name=f'{TWITCH_USERNAME} is live on Twitch!',
+#                 url=f'https://twitch.tv/{TWITCH_USERNAME}',
+#                 icon_url=icon_url  # รูปโปรไฟล์อยู่ข้าง ๆ ชื่อ
+#             )
+
+#             # เพิ่มฟิลด์สำหรับชื่อเกมและยอดวิวในบรรทัดเดียวกัน
+#             embed.add_field(name='Game', value=game_name, inline=True)  # ฟิลด์ชื่อเกม
+#             embed.add_field(name='Viewers', value=viewer_count, inline=True)  # ฟิลด์จำนวนคนดู
+
+#             # เพิ่มข้อมูลตัมแมลใน Embed
+#             embed.set_image(url=thumbnail_url)  # ใช้ set_image เพื่อแสดงภาพใหญ่
+
+#             # ส่ง Embed ไปยังช่อง
+#             await channel.send(f'❥ Uranutsu กำลังสตรีมอยู่ เข้ามาพูดคุยกันได้นะคะ @everyone ʕ ᵒ ᴥ ᵒʔ', embed=embed)
+#             is_live = True  # เปลี่ยนสถานะเป็นไลฟ์
+#         elif not stream and is_live:
+#             # ถ้าผู้ใช้ไม่ได้ไลฟ์และก่อนหน้านี้ไลฟ์
+#             is_live = False  # เปลี่ยนสถานะเป็นไม่ไลฟ์
+
+#         await asyncio.sleep(900)  # รอ 60 วินาที
+
 # Get Twitch OAuth Token
 def get_twitch_token():
     params = {
@@ -159,21 +259,6 @@ def get_user_id(twitch_username, token):
         return data[0]['id'], data[0]['profile_image_url']  # คืนค่า ID และ URL ของไอคอน
     return None, None  # คืนค่า None ถ้าไม่พบข้อมูล
 
-###################################################################################################################################
-# Function to get the latest clip from YouTube
-async def get_latest_clip(channel_id, discord_channel):
-    feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-    feed = feedparser.parse(feed_url)
-
-    if feed.entries:
-        latest_video = feed.entries[0]
-        video_title = latest_video['title']
-        video_url = latest_video['link']
-        thumbnail_url = latest_video.get('media_thumbnail', [{'url': ''}])[0]['url']  # ดึง thumbnail
-
-        # ส่งการแจ้งเตือนใน Discord
-        await discord_channel.send(f'Uranutsu Ch. อัพคลิปแล้ว มาดูกันเร๊วววววววว @everyone\n{video_url}')
-
 # Check if the user is live
 def check_live_status(user_id, token):
     headers = {
@@ -186,6 +271,11 @@ def check_live_status(user_id, token):
     if streams:
         return streams[0]  # คืนค่าข้อมูลสตรีมถ้ามี
     return None  # คืนค่า None ถ้าไม่มีสตรีม
+
+# ฟังก์ชันสำหรับสร้าง URL ของตัมเนล
+def generate_thumbnail_url(base_url):
+    timestamp = int(time.time())  # รับ timestamp ใหม่ทุกครั้ง
+    return f"{base_url.replace('{width}x{height}', '1280x720')}?t={timestamp}"
 
 # Task to check Twitch live status periodically
 async def live_status_task():
@@ -205,8 +295,8 @@ async def live_status_task():
             viewer_count = stream['viewer_count']  # จำนวนคนดู
             thumbnail_url = stream['thumbnail_url']  # URL ของตัมแมล
 
-            timestamp = int(time.time())
-            thumbnail_url = f"{thumbnail_url.replace('{width}x{height}', '1280x720')}?t={timestamp}"
+            # สร้าง URL สำหรับตัมเนล
+            thumbnail_url = generate_thumbnail_url(thumbnail_url)
 
             embed = discord.Embed(
                 description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
@@ -234,7 +324,8 @@ async def live_status_task():
             # ถ้าผู้ใช้ไม่ได้ไลฟ์และก่อนหน้านี้ไลฟ์
             is_live = False  # เปลี่ยนสถานะเป็นไม่ไลฟ์
 
-        await asyncio.sleep(900)  # รอ 60 วินาที
+        await asyncio.sleep(900)  # รอ 15 นาที (900 วินาที)
+
 
 ###################################################################################################################################
 
