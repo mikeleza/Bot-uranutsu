@@ -414,7 +414,7 @@ async def youtube_live_status_task():
 async def on_ready():
     print(f'Logged in as {client.user}')
     await client.tree.sync()
-    # client.loop.create_task(live_status_task())  # เริ่มการตรวจสอบสถานะ Twitch
+    client.loop.create_task(live_status_task())  # เริ่มการตรวจสอบสถานะ Twitch
     # check new clip
     # discord_channel = client.get_channel(discord_channel_id)
     # await check_youtube(channel_id, discord_channel)  # เรียกฟังก์ชันทันทีเพื่อส่งคลิปล่าสุด
