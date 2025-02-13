@@ -3,6 +3,7 @@ import discord
 import requests
 import asyncio
 import feedparser
+import time
 from discord import app_commands
 from discord.ext import commands
 from server import server_on
@@ -206,7 +207,7 @@ async def live_status_task():
 
             # เปลี่ยน URL ของ thumbnail ให้ถูกต้อง
             thumbnail_url = thumbnail_url.replace("{width}x{height}", "1280x720")  # เปลี่ยนขนาดของตัมแมล
-
+            thumbnail_url += f"?t={int(time.time())}"
             embed = discord.Embed(
                 description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
                 color=0x9146FF  # สีม่วง
@@ -322,12 +323,12 @@ async def youtube_live_status_task():
 async def on_ready():
     print(f'Logged in as {client.user}')
     await client.tree.sync()
-    client.loop.create_task(live_status_task())  # เริ่มการตรวจสอบสถานะ Twitch
+    # client.loop.create_task(live_status_task())  # เริ่มการตรวจสอบสถานะ Twitch
     # check new clip
-    discord_channel = client.get_channel(discord_channel_id)
-    await check_youtube(channel_id, discord_channel)  # เรียกฟังก์ชันทันทีเพื่อส่งคลิปล่าสุด
-    client.loop.create_task(youtube_notifier(client, channel_id, discord_channel_id)) # ตรวจสอบการอัพคลิปลง youtube
-    client.loop.create_task(youtube_live_status_task())  # เริ่มการตรวจสอบสถานะ YouTube
+    # discord_channel = client.get_channel(discord_channel_id)
+    # await check_youtube(channel_id, discord_channel)  # เรียกฟังก์ชันทันทีเพื่อส่งคลิปล่าสุด
+    # client.loop.create_task(youtube_notifier(client, channel_id, discord_channel_id)) # ตรวจสอบการอัพคลิปลง youtube
+    # client.loop.create_task(youtube_live_status_task())  # เริ่มการตรวจสอบสถานะ YouTube
 
 
 ###################################################################################################################################
