@@ -131,6 +131,8 @@ async def on_message(message):
         if discord_channel is None:
             await message.channel.send("ไม่สามารถค้นพบช่องที่ต้องการส่งข้อความ")
             return
+         # เรียกใช้ฟังก์ชัน get_latest_clip() ในพื้นหลัง
+        asyncio.create_task(get_latest_clip(channel_id, discord_channel))
             
     elif message.content.startswith('!name'):
         # รับชื่อใหม่จากข้อความที่ผู้ใช้ส่งมา
@@ -142,9 +144,7 @@ async def on_message(message):
             await message.channel.send(f"ชื่อ Twitch ของคุณถูกเปลี่ยนเป็น: {TWITCH_USERNAME}")
         else:
             await message.channel.send("กรุณาระบุชื่อ Twitch ใหม่หลังคำสั่ง !name เช่น !name new_username")
-            
-        # เรียกใช้ฟังก์ชัน get_latest_clip() ในพื้นหลัง
-        asyncio.create_task(get_latest_clip(channel_id, discord_channel))
+       
 
 ###################################################################################################################################
 
