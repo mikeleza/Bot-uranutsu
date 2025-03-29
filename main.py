@@ -91,6 +91,7 @@ message_sent = None
 @client.event
 async def on_message(message):
     global message_sent  # ใช้ global เพื่อเข้าถึงตัวแปรนี้
+    global TWITCH_USERNAME
 
     if message.author == client.user:
         return
@@ -130,7 +131,18 @@ async def on_message(message):
         if discord_channel is None:
             await message.channel.send("ไม่สามารถค้นพบช่องที่ต้องการส่งข้อความ")
             return
-        
+            
+     elif message.content.startswith('!name'):
+        # รับชื่อใหม่จากข้อความที่ผู้ใช้ส่งมา
+        new_name = message.content[len('!name '):].strip()  # ตัดคำสั่ง !name และช่องว่างออก
+
+        # ตรวจสอบว่ามีการป้อนชื่อใหม่หรือไม่
+        if new_name:
+            TWITCH_USERNAME = new_name  # เปลี่ยนชื่อใหม่
+            await message.channel.send(f"ชื่อ Twitch ของคุณถูกเปลี่ยนเป็น: {TWITCH_USERNAME}")
+        else:
+            await message.channel.send("กรุณาระบุชื่อ Twitch ใหม่หลังคำสั่ง !name เช่น !name new_username")
+            
         # เรียกใช้ฟังก์ชัน get_latest_clip() ในพื้นหลัง
         asyncio.create_task(get_latest_clip(channel_id, discord_channel))
 
