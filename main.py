@@ -189,52 +189,38 @@ def check_live_status(user_id, token):
 
 # Task to check Twitch live status periodically
 async def live_status_task():
-    await client.wait_until_ready()
     channel = client.get_channel(1267797428849868811)  # ใส่ ID ของช่อง Discord ที่ต้องการให้บอทแจ้งเตือน
     token = get_twitch_token()
     user_id, icon_url = get_user_id(TWITCH_USERNAME, token)
 
-    is_live = False  # สถานะเริ่มต้น: ไม่ไลฟ์
+    # ตรวจสอบสถานะไลฟ์
+    stream = check_live_status(user_id, token)
 
-    while not client.is_closed():
-        stream = check_live_status(user_id, token)
-        if stream and not is_live:
-            # ถ้าผู้ใช้ไลฟ์อยู่และก่อนหน้านี้ไม่ไลฟ์
-            title = stream['title']  # ชื่อไลฟ์
-            game_name = stream['game_name']  # ชื่อเกม
-            viewer_count = stream['viewer_count']  # จำนวนคนดู
-            thumbnail_url = stream['thumbnail_url']  # URL ของตัมแมล
+    if stream:
+        # ถ้าผู้ใช้ไลฟ์อยู่
+        title = stream['title']
+        game_name = stream['game_name']
+        viewer_count = stream['viewer_count']
+        thumbnail_url = stream['thumbnail_url']
+        thumbnail_url = thumbnail_url.replace("{width}x{height}", "1280x720") + f"?t={int(time.time())}"
 
-            # เปลี่ยน URL ของ thumbnail ให้ถูกต้อง
-            thumbnail_url = thumbnail_url.replace("{width}x{height}", "1280x720")  # เปลี่ยนขนาดของตัมแมล
-            thumbnail_url += f"?t={int(time.time())}"
-            embed = discord.Embed(
-                description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
-                color=0x9146FF  # สีม่วง
-            )
+        embed = discord.Embed(
+            description=f'**[{title}](https://twitch.tv/{TWITCH_USERNAME})**',
+            color=0x9146FF
+        )
 
-            # เพิ่มชื่อช่องและรูปโปรไฟล์ทางซ้าย
-            embed.set_author(
-                name=f'{TWITCH_USERNAME} is live on Twitch!',
-                url=f'https://twitch.tv/{TWITCH_USERNAME}',
-                icon_url=icon_url  # รูปโปรไฟล์อยู่ข้าง ๆ ชื่อ
-            )
+        embed.set_author(
+            name=f'{TWITCH_USERNAME} is live on Twitch!',
+            url=f'https://twitch.tv/{TWITCH_USERNAME}',
+            icon_url=icon_url
+        )
 
-            # เพิ่มฟิลด์สำหรับชื่อเกมและยอดวิวในบรรทัดเดียวกัน
-            embed.add_field(name='Game', value=game_name, inline=True)  # ฟิลด์ชื่อเกม
-            embed.add_field(name='Viewers', value=viewer_count, inline=True)  # ฟิลด์จำนวนคนดู
+        embed.add_field(name='Game', value=game_name, inline=True)
+        embed.add_field(name='Viewers', value=viewer_count, inline=True)
+        embed.set_image(url=thumbnail_url)
 
-            # เพิ่มข้อมูลตัมแมลใน Embed
-            embed.set_image(url=thumbnail_url)  # ใช้ set_image เพื่อแสดงภาพใหญ่
-
-            # ส่ง Embed ไปยังช่อง
-            await channel.send(f'❥ Uranutsu กำลังสตรีมอยู่ เข้ามาพูดคุยกันได้นะคะ @everyone ʕ ᵒ ᴥ ᵒʔ', embed=embed)
-            is_live = True  # เปลี่ยนสถานะเป็นไลฟ์
-        elif not stream and is_live:
-            # ถ้าผู้ใช้ไม่ได้ไลฟ์และก่อนหน้านี้ไลฟ์
-            is_live = False  # เปลี่ยนสถานะเป็นไม่ไลฟ์
-
-        await asyncio.sleep(900)  # รอ 60 วินาที
+        await channel.send(f'❥ Uranutsu กำลังสตรีมอยู่ เข้ามาพูดคุยกันได้นะคะ @everyone ʕ ᵒ ᴥ ᵒʔ', embed=embed)
+        print("🔴 สตรีมเริ่มแล้ว!")
 
 ###################################################################################################################################
 
