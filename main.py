@@ -132,7 +132,7 @@ async def on_message(message):
             await message.channel.send("ไม่สามารถค้นพบช่องที่ต้องการส่งข้อความ")
             return
             
-     elif message.content.startswith('!name'):
+    elif message.content.startswith('!name'):
         # รับชื่อใหม่จากข้อความที่ผู้ใช้ส่งมา
         new_name = message.content[len('!name '):].strip()  # ตัดคำสั่ง !name และช่องว่างออก
 
